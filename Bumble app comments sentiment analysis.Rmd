@@ -1,0 +1,320 @@
+---
+title: "bumble comment analysis"
+output: word_document
+date: "2023-04-10"
+---
+
+```{r}
+bumble <- read.csv("C:/Users/97655/Desktop/term2 作业/data in practice/bumble_google_play_reviews_analysis.csv",stringsAsFactors = T)
+```
+
+```{r}
+## see data type
+str(bumble)
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stopwords)
+library(tidytext)
+library(wordcloud)
+library(syuzhet)
+library(textdata)
+library(tidytext)
+library(pheatmap)
+```
+
+
+
+```{r}
+#bar chat frequency of each score comments
+ggplot(bumble,aes(score))+
+  geom_bar(fill = "#00C1E0")+
+  theme_bw()+
+  labs(x="Score",y="Total Count",title="Number of comments each score")+theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+```{r}
+#filter data into each score
+#level 1
+bumble_1=bumble[bumble$score==1,]
+#level 2
+bumble_2=bumble[bumble$score==2,]
+#level 3 
+bumble_3=bumble[bumble$score==3,]
+#level 4
+bumble_4=bumble[bumble$score==4,]
+#level 5
+bumble_5=bumble[bumble$score==5,]
+
+```
+
+```{r}
+#level 1, the project only looks at the sentiment of the tweets, we extract only the variable 'content':
+bumble_1_content<- bumble_1$content
+bumble.content.1<- as.character(bumble_1_content)
+
+#level 2, the project only looks at the sentiment of the tweets, we extract only the variable 'content':
+bumble_2_content<- bumble_2$content
+bumble.content.2<- as.character(bumble_2_content)
+
+#level 3, the project only looks at the sentiment of the tweets, we extract only the variable 'content':
+bumble_3_content<- bumble_3$content
+bumble.content.3<- as.character(bumble_3_content)
+
+#level 4, the project only looks at the sentiment of the tweets, we extract only the variable 'content':
+bumble_4_content<- bumble_4$content
+bumble.content.4<- as.character(bumble_4_content)
+
+#level 5, the project only looks at the sentiment of the tweets, we extract only the variable 'content':
+bumble_5_content<- bumble_5$content
+bumble.content.5<- as.character(bumble_5_content)
+
+
+```
+```{r}
+## Remove all special characters using [[:punct:]]
+clean_1 <- gsub("[[:punct:]]", "", bumble.content.1)
+clean_2 <- gsub("[[:punct:]]", "", bumble.content.2)
+clean_3 <- gsub("[[:punct:]]", "", bumble.content.3)
+clean_4 <- gsub("[[:punct:]]", "", bumble.content.4)
+clean_5 <- gsub("[[:punct:]]", "", bumble.content.5)
+```
+
+
+```{r}
+#remove stopwords in English
+stopwords_en<- stopwords::stopwords("en")
+```
+
+```{r}
+#clean1
+rm.stopword1 <- unlist(lapply(clean_1, function(x) {paste(unlist(strsplit(x, " "))[!(unlist(strsplit(x, " ")) %in% stopwords_en)], collapse=" ")}))
+#clean2
+rm.stopword2 <- unlist(lapply(clean_2, function(x) {paste(unlist(strsplit(x, " "))[!(unlist(strsplit(x, " ")) %in% stopwords_en)], collapse=" ")}))
+#clean3
+rm.stopword3 <- unlist(lapply(clean_3, function(x) {paste(unlist(strsplit(x, " "))[!(unlist(strsplit(x, " ")) %in% stopwords_en)], collapse=" ")}))
+#clean4
+rm.stopword4 <- unlist(lapply(clean_4, function(x) {paste(unlist(strsplit(x, " "))[!(unlist(strsplit(x, " ")) %in% stopwords_en)], collapse=" ")}))
+#clean5
+rm.stopword5 <- unlist(lapply(clean_5, function(x) {paste(unlist(strsplit(x, " "))[!(unlist(strsplit(x, " ")) %in% stopwords_en)], collapse=" ")}))
+
+```
+
+```{r}
+## Attribute cleaned data to dataframe
+#1
+clean_atibble1 <- data_frame(Text = rm.stopword1) # tibble aka neater data frame
+#2
+clean_atibble2 <- data_frame(Text = rm.stopword2) # tibble aka neater data frame
+#3
+clean_atibble3 <- data_frame(Text = rm.stopword3) # tibble aka neater data frame
+#4
+clean_atibble4 <- data_frame(Text = rm.stopword4) # tibble aka neater data frame
+#5
+clean_atibble5 <- data_frame(Text = rm.stopword5) # tibble aka neater data frame
+
+```
+
+```{r}
+## generate word cloud according to score 1-5
+#1
+wordcloud(clean_atibble1, scale = c(2, 1), min.freq = 260, colors = rainbow(30))
+mtext("Word Cloud Score 1", side = 3, line = 0.5, cex = 1.5)
+
+```
+
+```{r}
+#2
+wordcloud(clean_atibble2, scale = c(2, 1), min.freq = 50, colors = rainbow(30))
+mtext("Word Cloud Score 2", side = 3, line = 0.5, cex = 1.5)
+
+```
+
+```{r}
+#3
+wordcloud(clean_atibble3, scale = c(2, 1), min.freq = 25, colors = rainbow(30))
+mtext("Word Cloud Score 3", side = 3, line = 0.5, cex = 1.5)
+```
+```{r}
+#4
+wordcloud(clean_atibble4, scale = c(2, 1), min.freq = 15, colors = rainbow(30))
+mtext("Word Cloud Score 4", side = 3, line = 0.5, cex = 1.5)
+```
+```{r}
+#5
+wordcloud(clean_atibble5, scale = c(2, 1), min.freq = 22, colors = rainbow(30))
+mtext("Word Cloud Score 5", side = 3, line = 0.5, cex = 1.5)
+```
+
+
+
+```{r}
+#1
+bumble_words1 <- clean_atibble1 %>% unnest_tokens(output = word, input = Text)
+#2
+bumble_words2 <- clean_atibble2 %>% unnest_tokens(output = word, input = Text)
+#3
+bumble_words3 <- clean_atibble3 %>% unnest_tokens(output = word, input = Text)
+#4
+bumble_words4 <- clean_atibble4 %>% unnest_tokens(output = word, input = Text)
+#5
+bumble_words5 <- clean_atibble5 %>% unnest_tokens(output = word, input = Text)
+
+```
+
+```{r}
+#sentiment analysis using NRC lexicon to analysis
+sentiment_text1 = get_nrc_sentiment(rm.stopword1)
+sentiment_text2 = get_nrc_sentiment(rm.stopword2)
+sentiment_text3 = get_nrc_sentiment(rm.stopword3)
+sentiment_text4 = get_nrc_sentiment(rm.stopword4)
+sentiment_text5 = get_nrc_sentiment(rm.stopword5)
+```
+
+
+```{r}
+# mean sentiment plot of score 1
+sentiment_plot_1 <- data.frame(mean_anger=mean(sentiment_text1$anger),
+                               mean_anticipation=mean(sentiment_text1$anticipation),
+                               mean_disgust=mean(sentiment_text1$disgust),
+                               mean_fear=mean(sentiment_text1$fear),
+                               mean_joy=mean(sentiment_text1$joy),
+                               mean_sadness=mean(sentiment_text1$sadness),
+                               mean_surprise=mean(sentiment_text1$surprise),
+                               mean_trust=mean(sentiment_text1$trust),
+                               mean_negative=mean(sentiment_text1$negative),
+                               mean_positive=mean(sentiment_text1$positive))
+
+sentiment_plot_df1 <- sentiment_plot_1 %>% reshape2::melt() 
+ggplot(sentiment_plot_df1, aes(value,  variable, fill =  variable)) + 
+  geom_col(color = "black", width = 0.6, show.legend = FALSE) + 
+  theme_bw(base_size = 15, base_family = "serif") + 
+  # scale_fill_brewer(palette = "Paired") + 
+  theme(axis.text = element_text(colour = "black"))+
+  labs(x = "mean sentiment value", y = "Genre",title="Mean sentiment value of score 1")+
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+```
+
+```{r}
+# mean sentiment plot of scroe 2
+sentiment_plot_2 <- data.frame(mean_anger=mean(sentiment_text2$anger),
+                               mean_anticipation=mean(sentiment_text2$anticipation),
+                               mean_disgust=mean(sentiment_text2$disgust),
+                               mean_fear=mean(sentiment_text2$fear),
+                               mean_joy=mean(sentiment_text2$joy),
+                               mean_sadness=mean(sentiment_text2$sadness),
+                               mean_surprise=mean(sentiment_text2$surprise),
+                               mean_trust=mean(sentiment_text2$trust),
+                               mean_negative=mean(sentiment_text2$negative),
+                               mean_positive=mean(sentiment_text2$positive))
+
+sentiment_plot_df2 <- sentiment_plot_2 %>% reshape2::melt() 
+ggplot(sentiment_plot_df2, aes(value,  variable, fill =  variable)) + 
+  geom_col(color = "black", width = 0.6, show.legend = FALSE) + 
+  theme_bw(base_size = 15, base_family = "serif") + 
+  # scale_fill_brewer(palette = "Paired") + 
+  theme(axis.text = element_text(colour = "black"))+
+  labs(x = "mean sentiment value", y = "Genre",title="Mean sentiment value of score 2")+
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+```{r}
+# mean sentiment plot of scroe 3
+sentiment_plot_3 <- data.frame(mean_anger=mean(sentiment_text3$anger),
+                               mean_anticipation=mean(sentiment_text3$anticipation),
+                               mean_disgust=mean(sentiment_text3$disgust),
+                               mean_fear=mean(sentiment_text3$fear),
+                               mean_joy=mean(sentiment_text3$joy),
+                               mean_sadness=mean(sentiment_text3$sadness),
+                               mean_surprise=mean(sentiment_text3$surprise),
+                               mean_trust=mean(sentiment_text3$trust),
+                               mean_negative=mean(sentiment_text3$negative),
+                               mean_positive=mean(sentiment_text3$positive))
+
+sentiment_plot_df3 <- sentiment_plot_3 %>% reshape2::melt() 
+ggplot(sentiment_plot_df3, aes(value,  variable, fill =  variable)) + 
+  geom_col(color = "black", width = 0.6, show.legend = FALSE) + 
+  theme_bw(base_size = 15, base_family = "serif") + 
+  # scale_fill_brewer(palette = "Paired") + 
+  theme(axis.text = element_text(colour = "black"))+
+  labs(x = "mean sentiment value", y = "Genre",title="Mean sentiment value of score 3")+
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+```{r}
+# mean sentiment plot of scroe 4
+sentiment_plot_4 <- data.frame(mean_anger=mean(sentiment_text4$anger),
+                               mean_anticipation=mean(sentiment_text4$anticipation),
+                               mean_disgust=mean(sentiment_text4$disgust),
+                               mean_fear=mean(sentiment_text4$fear),
+                               mean_joy=mean(sentiment_text4$joy),
+                               mean_sadness=mean(sentiment_text4$sadness),
+                               mean_surprise=mean(sentiment_text4$surprise),
+                               mean_trust=mean(sentiment_text4$trust),
+                               mean_negative=mean(sentiment_text4$negative),
+                               mean_positive=mean(sentiment_text4$positive))
+
+sentiment_plot_df4 <- sentiment_plot_4 %>% reshape2::melt() 
+ggplot(sentiment_plot_df4, aes(value,  variable, fill =  variable)) + 
+  geom_col(color = "black", width = 0.6, show.legend = FALSE) + 
+  theme_bw(base_size = 15, base_family = "serif") + 
+  # scale_fill_brewer(palette = "Paired") + 
+  theme(axis.text = element_text(colour = "black"))+
+  labs(x = "mean sentiment value", y = "Genre",title="Mean sentiment value of score 4")+
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+
+```{r}
+# mean sentiment plot of scroe 5
+sentiment_plot_5 <- data.frame(mean_anger=mean(sentiment_text5$anger),
+                               mean_anticipation=mean(sentiment_text5$anticipation),
+                               mean_disgust=mean(sentiment_text5$disgust),
+                               mean_fear=mean(sentiment_text5$fear),
+                               mean_joy=mean(sentiment_text5$joy),
+                               mean_sadness=mean(sentiment_text5$sadness),
+                               mean_surprise=mean(sentiment_text5$surprise),
+                               mean_trust=mean(sentiment_text5$trust),
+                               mean_negative=mean(sentiment_text5$negative),
+                               mean_positive=mean(sentiment_text5$positive))
+
+sentiment_plot_df5 <- sentiment_plot_5 %>% reshape2::melt() 
+ggplot(sentiment_plot_df5, aes(value,  variable, fill =  variable)) + 
+  geom_col(color = "black", width = 0.6, show.legend = FALSE) + 
+  theme_bw(base_size = 15, base_family = "serif") + 
+  # scale_fill_brewer(palette = "Paired") + 
+  theme(axis.text = element_text(colour = "black"))+
+  labs(x = "mean sentiment value", y = "Genre",title="Mean sentiment value of score 5")+
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+```{r}
+#picks out the individual words and places them as rows
+
+
+#1
+bumble_words1 <- clean_atibble1 %>% unnest_tokens(output = word, input = Text)
+#2
+bumble_words2 <- clean_atibble2 %>% unnest_tokens(output = word, input = Text)
+#3
+bumble_words3 <- clean_atibble3 %>% unnest_tokens(output = word, input = Text)
+#4
+bumble_words4 <- clean_atibble4 %>% unnest_tokens(output = word, input = Text)
+#5
+bumble_words5 <- clean_atibble5 %>% unnest_tokens(output = word, input = Text)
+
+```
+
+
+
+```{r}
+#heatmap 
+
+sentiment_heatmap<- read.csv("C:/Users/97655/Desktop/term2 作业/data in practice/sentiment_plot_total.csv",row.names ='x')
+sentiment_heatmap_mat <- as.matrix(sentiment_heatmap)
+bk <- c(seq(0,0.6,by=0.01),seq(0.6,2,by=0.01))
+pheatmap(sentiment_heatmap_mat, color = c(colorRampPalette(colors = c("#00C1E0","white"))(length(bk)/2),colorRampPalette(colors = c("white","pink"))(length(bk)/2)),main = "Heatmap of sentiment value score 1-5")
+```
+
+
+
